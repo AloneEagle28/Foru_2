@@ -66,8 +66,11 @@
         // --- CUSTOMIZABLE VALUES ---
         const PARAGRAPH_TEXT = "Thank you for always being there for me through thick and thin! You are truly the best friend anyone could ask for.";
 
-        // Distance (in pixels) both the Heart and "HAPPY FRIENDSHIP DAY" move up together
-        const TITLE_MOVE_UP_PIXELS = 200;
+        // Distance (in pixels) the Heart moves up
+        const HEART_MOVE_UP_PIXELS = 130;
+
+        // Distance (in pixels) "HAPPY FRIENDSHIP DAY" moves up
+        const TITLE_MOVE_UP_PIXELS = 180;
 
         // Font size for the thin handwriting paragraph text
         const PARAGRAPH_FONT_SIZE = 32;
@@ -111,7 +114,7 @@
 
         function getHeartCenterY(tick) {
             const originalY = height * 0.50;
-            const targetY = originalY - TITLE_MOVE_UP_PIXELS;
+            const targetY = originalY - HEART_MOVE_UP_PIXELS;
 
             if (tick <= SHIFT_UP_START_TICK) {
                 return originalY;
