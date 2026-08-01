@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Happy Friendship Day</title>
+    <!-- Import Google Handwriting Fonts (Sacramento & Caveat) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400&family=Sacramento&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -62,8 +66,11 @@
         // --- CUSTOMIZABLE VALUES ---
         const PARAGRAPH_TEXT = "Thank you for always being there for me through thick and thin! You are truly the best friend anyone could ask for.";
 
-        // EDIT THIS VALUE: Change how many pixels "HAPPY FRIENDSHIP DAY" moves up (e.g., 50, 100, 150)
-        const TITLE_MOVE_UP_PIXELS = 150;
+        // Distance (in pixels) both the Heart and "HAPPY FRIENDSHIP DAY" move up together
+        const TITLE_MOVE_UP_PIXELS = 180;
+
+        // Font size for the thin handwriting paragraph text
+        const PARAGRAPH_FONT_SIZE = 32;
 
         // Load background image
         const bgImage = new Image();
@@ -91,12 +98,10 @@
         const SPEED_FACTOR = 0.75; 
 
         // Timeline Configuration
-        const SLIDE_START_TICK = 100;
-        const SLIDE_DURATION = 60;
-        const TITLE_START_TICK = 160;
+        const TITLE_START_TICK = 100;
         
-        // Secondary movement for paragraph space
-        const SHIFT_UP_START_TICK = 280;
+        // Start moving both heart and title up together
+        const SHIFT_UP_START_TICK = 240;
         const SHIFT_UP_DURATION = 60;
         const PARA_START_TICK = SHIFT_UP_START_TICK + SHIFT_UP_DURATION + 20;
 
@@ -106,21 +111,21 @@
 
         function getHeartCenterY(tick) {
             const originalY = height * 0.50;
-            const targetY = height * 0.35; // Heart stays here once moved
+            const targetY = originalY - TITLE_MOVE_UP_PIXELS;
 
-            if (tick <= SLIDE_START_TICK) {
+            if (tick <= SHIFT_UP_START_TICK) {
                 return originalY;
             }
-            if (tick <= SLIDE_START_TICK + SLIDE_DURATION) {
-                const progress = (tick - SLIDE_START_TICK) / SLIDE_DURATION;
-                return originalY + ((targetY - originalY) * easeInOutCubic(progress));
+            if (tick >= SHIFT_UP_START_TICK + SHIFT_UP_DURATION) {
+                return targetY;
             }
-            return targetY;
+            const progress = (tick - SHIFT_UP_START_TICK) / SHIFT_UP_DURATION;
+            return originalY + ((targetY - originalY) * easeInOutCubic(progress));
         }
 
         function getTitleY(tick) {
             const originalY = height * 0.85;
-            const targetY = originalY - TITLE_MOVE_UP_PIXELS; // Shifts up by the exact pixel count defined above
+            const targetY = originalY - TITLE_MOVE_UP_PIXELS;
 
             if (tick <= SHIFT_UP_START_TICK) {
                 return originalY;
@@ -325,26 +330,27 @@
 
             const currentText = PARAGRAPH_TEXT.substring(0, lettersToShow);
             
-            const fontSize = Math.max(16, Math.floor(width * 0.022));
-            const fontSpec = `400 ${fontSize}px 'Arial', sans-serif`;
-            const maxWidth = width * 0.75;
-            const lineHeight = fontSize * 1.5;
+            // Thin, sleek handwriting font
+            const fontSpec = `400 ${PARAGRAPH_FONT_SIZE}px 'Sacramento', 'Caveat', cursive`;
+            const maxWidth = width * 0.80;
+            const lineHeight = PARAGRAPH_FONT_SIZE * 1.2;
 
             ctx.save();
             ctx.font = fontSpec;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
+            
+            // Pure clean white text without stroke or glow
             ctx.fillStyle = '#FFFFFF';
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 3;
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1.0;
 
             const lines = wrapText(ctx, currentText, maxWidth);
             
-            // Starts slightly below where the main title finishes moving
-            const startY = (height * 0.85 - TITLE_MOVE_UP_PIXELS) + (fontSize * 2);
+            // Starts directly beneath the title after it moves up
+            const startY = (height * 0.85 - TITLE_MOVE_UP_PIXELS) + (PARAGRAPH_FONT_SIZE * 1.2);
 
             for (let i = 0; i < lines.length; i++) {
-                ctx.strokeText(lines[i], width * 0.50, startY + (i * lineHeight));
                 ctx.fillText(lines[i], width * 0.50, startY + (i * lineHeight));
             }
 
