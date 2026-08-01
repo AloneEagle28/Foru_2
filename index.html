@@ -64,7 +64,8 @@
         const bgVideo = document.getElementById('bg-video');
 
         // --- CUSTOMIZABLE VALUES ---
-        const PARAGRAPH_TEXT = "Thank you for being there in my life.I always wanna see you happy reh...I never wanna lose you in my life coz u really mean alot to me and if u've ever that i dint value u as my bestfriend-- it was never that way and it is never gonna be.If possible - stop seeing me as one who messed up everything and consider me as ur friend like before";
+        const PARAGRAPH_TEXT = "Thank you for being there in my life.I always wanna see you happy reh...I never wanna lose you in my life coz u really mean alot to me and if u've ever though that i dint value u as my bestfriend-- it was never that way and it is never gonna be that way. If possible - stop seeing me as one who messed up everything and consider me as ur friend like before";
+        const SIGN_OFF_TEXT = "- MMS";
 
         // Distance (in pixels) the Heart moves up
         const HEART_MOVE_UP_PIXELS = 130;
@@ -333,28 +334,55 @@
 
             const currentText = PARAGRAPH_TEXT.substring(0, lettersToShow);
             
-            // Modern, legible handwriting font
             const fontSpec = `500 ${PARAGRAPH_FONT_SIZE}px 'Dancing Script', 'Great Vibes', 'Caveat', cursive`;
             const maxWidth = width * 0.80;
             const lineHeight = PARAGRAPH_FONT_SIZE * 1.4;
+            const PARAGRAPH_GAP = 16;
 
             ctx.save();
             ctx.font = fontSpec;
-            ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
-            
-            // Clean pure white text
             ctx.fillStyle = '#FFFFFF';
             ctx.shadowBlur = 0;
             ctx.globalAlpha = 1.0;
 
-            const lines = wrapText(ctx, currentText, maxWidth);
-            
-            // Positions directly beneath the moved title
+            const rawParagraphs = currentText.split('\n');
             const startY = (height * 0.85 - TITLE_MOVE_UP_PIXELS) + (PARAGRAPH_FONT_SIZE * 1.4);
 
-            for (let i = 0; i < lines.length; i++) {
-                ctx.fillText(lines[i], width * 0.50, startY + (i * lineHeight));
+            let currentY = startY;
+
+            // 1. Draw main paragraph text (centered)
+            ctx.textAlign = 'center';
+            for (let p = 0; p < rawParagraphs.length; p++) {
+                const paragraphStr = rawParagraphs[p].trim();
+                
+                if (paragraphStr.length > 0) {
+                    const lines = wrapText(ctx, paragraphStr, maxWidth);
+                    for (let i = 0; i < lines.length; i++) {
+                        ctx.fillText(lines[i], width * 0.50, currentY);
+                        currentY += lineHeight;
+                    }
+                }
+                currentY += PARAGRAPH_GAP;
+            }
+
+            // 2. Draw "- ur friend" at the bottom right once paragraph finishes typing
+            const totalParaTicks = PARAGRAPH_TEXT.length * typingSpeed;
+            const signOffStartTick = startTime + totalParaTicks + 10;
+
+            if (tick >= signOffStartTick) {
+                const signOffLetters = Math.min(
+                    SIGN_OFF_TEXT.length, 
+                    Math.floor((tick - signOffStartTick) / typingSpeed)
+                );
+
+                if (signOffLetters > 0) {
+                    const currentSignOff = SIGN_OFF_TEXT.substring(0, signOffLetters);
+                    const rightEdgeX = (width * 0.50) + (maxWidth / 2);
+
+                    ctx.textAlign = 'right';
+                    ctx.fillText(currentSignOff, rightEdgeX, currentY);
+                }
             }
 
             ctx.restore();
