@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Friendship Day</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #FFFFFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100%;
+            max-height: 100%;
+            box-shadow: 0 0 25px rgba(0,0,0,0.1);
+        }
+
+        #bg-video {
+            display: none;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container">
+        <!-- Replace 'gone_1.gif' with the path to your video or animated file -->
+        <video id="bg-video" autoplay loop muted playsinline>
+            <source src="gone_1.gif" type="gif">
+        </video>
+        <canvas id="mainCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const bgVideo = document.getElementById('bg-video');
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let t = 0;
+        const SPEED_FACTOR = 0.75; 
+
+        const SLIDE_START_TICK = 100;
+        const SLIDE_DURATION = 60;
+        const TEXT_START_TICK = 160;
+
+        function easeInOutCubic(x) {
+            return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+        }
+
+        function getHeartCenterY(tick) {
+            const originalY = height * 0.50;
+            const targetY = height * 0.35;
+
+            if (tick <= SLIDE_START_TICK) {
+                return originalY;
+            }
+            if (tick >= SLIDE_START_TICK + SLIDE_DURATION) {
+                return targetY;
+            }
+            const progress = (tick - SLIDE_START_TICK) / SLIDE_DURATION;
+            const easedProgress = easeInOutCubic(progress);
+            return originalY + ((targetY - originalY) * easedProgress);
+        }
+
+        const FLOWER_PETAL_COLORS = [
+            '#FF1744', '#FF4081', '#F50057', '#E91E63', '#FF5252', '#FF80AB'
+        ];
+
+        class FlowerParticle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = (Math.random() - 0.5) * (width * 0.9);
+                this.y = (Math.random() - 0.5) * (height * 0.9);
+                this.vx = (Math.random() - 0.5) * (width * 0.005);
+                this.vy = (Math.random() - 0.5) * (height * 0.005);
+
+                this.petalColor = FLOWER_PETAL_COLORS[Math.floor(Math.random() * FLOWER_PETAL_COLORS.length)];
+                this.centerColor = '#FFEB3B';
+                
+                this.targetAngle = Math.random() * 2 * Math.PI;
+                this.fillRadius = Math.sqrt(Math.random()); 
+                this.offset = (Math.random() - 0.5) * (Math.min(width, height) * 0.015);
+                
+                this.baseSizeRatio = (Math.random() * 0.004 + 0.004); 
+                this.petalCount = 5;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.05;
+            }
+
+            update(tick) {
+                const minDimension = Math.min(width, height);
+                const baseScale = minDimension * 0.022;
+
+                let scale;
+                if (tick < 300) {
+                    scale = baseScale + (baseScale * 0.25) * Math.sin(tick * 0.015);
+                } else {
+                    const beat = Math.sin(tick * 0.025) + 0.3 * Math.sin(tick * 0.05);
+                    scale = baseScale + (baseScale * 0.06) * beat;
+                }
+
+                const base_x = 16 * Math.pow(Math.sin(this.targetAngle), 3);
+                const base_y = -(
+                    13 * Math.cos(this.targetAngle) - 
+                    5 * Math.cos(2 * this.targetAngle) - 
+                    2 * Math.cos(3 * this.targetAngle) - 
+                    Math.cos(4 * this.targetAngle)
+                );
+
+                const heart_x = (base_x * this.fillRadius * scale) + (this.offset * Math.cos(this.targetAngle));
+                const heart_y = (base_y * this.fillRadius * scale) + (this.offset * Math.sin(this.targetAngle));
+
+                const dx = heart_x - this.x;
+                const dy = heart_y - this.y;
+
+                this.vx += dx * 0.006 * SPEED_FACTOR;
+                this.vy += dy * 0.006 * SPEED_FACTOR;
+
+                const swirlFactor = Math.max(0.00005, 0.0003 - (tick * 0.000001));
+                this.vx += -dy * swirlFactor;
+                this.vy += dx * swirlFactor;
+
+                this.vx *= 0.94;
+                this.vy *= 0.94;
+
+                this.x += this.vx * SPEED_FACTOR;
+                this.y += this.vy * SPEED_FACTOR;
+                this.rotation += this.rotationSpeed;
+            }
+
+            draw(context, heartCenterX, heartCenterY) {
+                const currentX = heartCenterX + this.x;
+                const currentY = heartCenterY + this.y;
+                const flowerSize = Math.min(width, height) * this.baseSizeRatio;
+
+                context.save();
+                context.translate(currentX, currentY);
+                context.rotate(this.rotation);
+                context.globalAlpha = 1.0;
+
+                context.fillStyle = this.petalColor;
+                for (let i = 0; i < this.petalCount; i++) {
+                    const angle = (i * 2 * Math.PI) / this.petalCount;
+                    const px = Math.cos(angle) * (flowerSize * 0.7);
+                    const py = Math.sin(angle) * (flowerSize * 0.7);
+
+                    context.beginPath();
+                    context.arc(px, py, flowerSize * 0.55, 0, Math.PI * 2);
+                    context.fill();
+                }
+
+                context.fillStyle = this.centerColor;
+                context.beginPath();
+                context.arc(0, 0, flowerSize * 0.4, 0, Math.PI * 2);
+                context.fill();
+
+                context.restore();
+            }
+        }
+
+        function drawAmbientLightGlow(tick, heartCenterX, heartCenterY) {
+            const beat = Math.sin(tick * 0.025) + 0.3 * Math.sin(tick * 0.05);
+            const baseGlowRadius = Math.min(width, height) * 0.35;
+            const glowRadius = baseGlowRadius + (baseGlowRadius * 0.06) * beat;
+
+            ctx.save();
+            ctx.globalCompositeOperation = 'multiply';
+
+            const gradient = ctx.createRadialGradient(
+                heartCenterX, heartCenterY, glowRadius * 0.1,
+                heartCenterX, heartCenterY, glowRadius
+            );
+
+            gradient.addColorStop(0, 'rgba(255, 30, 80, 0.35)');
+            gradient.addColorStop(0.4, 'rgba(220, 20, 60, 0.20)');
+            gradient.addColorStop(0.7, 'rgba(180, 10, 50, 0.08)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(heartCenterX, heartCenterY, glowRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        const PARTICLE_COUNT = 3200;
+        const particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push(new FlowerParticle());
+        }
+
+        function drawTypewriterText(tick, startTime = TEXT_START_TICK) {
+            if (tick < startTime) return;
+
+            const fullText = "HAPPY FRIENDSHIP DAY MT!!";
+            const typingSpeed = 3; 
+            const lettersToShow = Math.min(fullText.length, Math.floor((tick - startTime) / typingSpeed));
+
+            if (lettersToShow <= 0) return;
+
+            const currentText = fullText.substring(0, lettersToShow);
+            
+            const textX = width * 0.50;
+            const bounceY = (height * 0.90) + Math.sin(tick * 0.025) * (height * 0.005);
+            
+            const fontSize = Math.floor(width * 0.05 + Math.sin(tick * 0.025) * 2);
+            const fontSpec = `900 ${fontSize}px 'Impact', 'Arial Black', sans-serif`;
+
+            ctx.save();
+            ctx.font = fontSpec;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.globalAlpha = 1.0;
+
+            // Solid bold black text
+            ctx.fillStyle = '#000000';
+            ctx.fillText(currentText, textX, bounceY);
+            ctx.restore();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            const heartCenterX = width * 0.50;
+            const heartCenterY = getHeartCenterY(t);
+
+            // Draw video frame if ready, else fall back to white background
+            if (bgVideo.readyState >= 2) {
+                ctx.drawImage(bgVideo, 0, 0, width, height);
+            } else {
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            drawAmbientLightGlow(t, heartCenterX, heartCenterY);
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update(t);
+                particles[i].draw(ctx, heartCenterX, heartCenterY);
+            }
+
+            drawTypewriterText(t, TEXT_START_TICK);
+
+            t += SPEED_FACTOR;
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
