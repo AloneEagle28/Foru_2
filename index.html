@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Happy Friendship Day</title>
-    <!-- Import Google Handwriting Fonts (Sacramento & Caveat) -->
+    <!-- Import Clean Google Handwriting Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400&family=Sacramento&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600&family=Great+Vibes&family=Caveat:wght@500&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -64,16 +64,16 @@
         const bgVideo = document.getElementById('bg-video');
 
         // --- CUSTOMIZABLE VALUES ---
-        const PARAGRAPH_TEXT = "Thank you for always being there in my life reh.I dont wanna loose my BestFriend-MT in my life at any cost.I'll do anything if its for being ur bestfriend like I used to be and if u've ever thought that i did not value u as my bestfriend - it was never that way and it is never gonna be.At END-- what matters is that i always want u to be happy.TAKE CARE!";
+        const PARAGRAPH_TEXT = "Thank you for always being there for me through thick and thin! You are truly the best friend anyone could ask for.";
 
         // Distance (in pixels) the Heart moves up
         const HEART_MOVE_UP_PIXELS = 130;
 
         // Distance (in pixels) "HAPPY FRIENDSHIP DAY" moves up
-        const TITLE_MOVE_UP_PIXELS = 180;
+        const TITLE_MOVE_UP_PIXELS = 220;
 
-        // Font size for the thin handwriting paragraph text
-        const PARAGRAPH_FONT_SIZE = 32;
+        // Font size for the clean handwriting paragraph text
+        const PARAGRAPH_FONT_SIZE = 28;
 
         // Load background image
         const bgImage = new Image();
@@ -333,25 +333,25 @@
 
             const currentText = PARAGRAPH_TEXT.substring(0, lettersToShow);
             
-            // Thin, sleek handwriting font
-            const fontSpec = `400 ${PARAGRAPH_FONT_SIZE}px 'Sacramento', 'Caveat', cursive`;
+            // Modern, legible handwriting font
+            const fontSpec = `500 ${PARAGRAPH_FONT_SIZE}px 'Dancing Script', 'Great Vibes', 'Caveat', cursive`;
             const maxWidth = width * 0.80;
-            const lineHeight = PARAGRAPH_FONT_SIZE * 1.2;
+            const lineHeight = PARAGRAPH_FONT_SIZE * 1.4;
 
             ctx.save();
             ctx.font = fontSpec;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
             
-            // Pure clean white text without stroke or glow
+            // Clean pure white text
             ctx.fillStyle = '#FFFFFF';
             ctx.shadowBlur = 0;
             ctx.globalAlpha = 1.0;
 
             const lines = wrapText(ctx, currentText, maxWidth);
             
-            // Starts directly beneath the title after it moves up
-            const startY = (height * 0.85 - TITLE_MOVE_UP_PIXELS) + (PARAGRAPH_FONT_SIZE * 1.2);
+            // Positions directly beneath the moved title
+            const startY = (height * 0.85 - TITLE_MOVE_UP_PIXELS) + (PARAGRAPH_FONT_SIZE * 1.4);
 
             for (let i = 0; i < lines.length; i++) {
                 ctx.fillText(lines[i], width * 0.50, startY + (i * lineHeight));
