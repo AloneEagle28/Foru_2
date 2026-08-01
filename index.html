@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Happy Friendship Day</title>
-    <!-- Import Google Font for handwriting style -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -67,10 +63,7 @@
         const PARAGRAPH_TEXT = "Thank you for always being there for me through thick and thin! You are truly the best friend anyone could ask for.";
 
         // EDIT THIS VALUE: Change how many pixels "HAPPY FRIENDSHIP DAY" moves up (e.g., 50, 100, 150)
-        const TITLE_MOVE_UP_PIXELS = 100;
-
-        // EDIT THIS VALUE: Font size for the handwriting paragraph text (in pixels)
-        const PARAGRAPH_FONT_SIZE = 28;
+        const TITLE_MOVE_UP_PIXELS = 150;
 
         // Load background image
         const bgImage = new Image();
@@ -332,27 +325,26 @@
 
             const currentText = PARAGRAPH_TEXT.substring(0, lettersToShow);
             
-            // Using handwriting font style
-            const fontSpec = `600 ${PARAGRAPH_FONT_SIZE}px 'Caveat', 'Segoe Print', 'Comic Sans MS', cursive`;
-            const maxWidth = width * 0.80;
-            const lineHeight = PARAGRAPH_FONT_SIZE * 1.3;
+            const fontSize = Math.max(16, Math.floor(width * 0.022));
+            const fontSpec = `400 ${fontSize}px 'Arial', sans-serif`;
+            const maxWidth = width * 0.75;
+            const lineHeight = fontSize * 1.5;
 
             ctx.save();
             ctx.font = fontSpec;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
-            
-            // Pure white text, no glow, no shadow, no stroke
             ctx.fillStyle = '#FFFFFF';
-            ctx.shadowBlur = 0;
-            ctx.globalAlpha = 1.0;
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3;
 
             const lines = wrapText(ctx, currentText, maxWidth);
             
-            // Positions paragraph below the title
-            const startY = (height * 0.85 - TITLE_MOVE_UP_PIXELS) + (PARAGRAPH_FONT_SIZE * 1.5);
+            // Starts slightly below where the main title finishes moving
+            const startY = (height * 0.85 - TITLE_MOVE_UP_PIXELS) + (fontSize * 2);
 
             for (let i = 0; i < lines.length; i++) {
+                ctx.strokeText(lines[i], width * 0.50, startY + (i * lineHeight));
                 ctx.fillText(lines[i], width * 0.50, startY + (i * lineHeight));
             }
 
